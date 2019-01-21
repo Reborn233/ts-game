@@ -46,7 +46,8 @@ module.exports = (options = {}) => ({
   plugins: [
     new ExtractTextPlugin('static/css/styles.css'),
     new HtmlWebpackPlugin({
-      template: 'src/index.html'
+      template: 'src/index.html',
+      favicon: 'src/favicon.ico'
     })
   ],
   optimization: {
