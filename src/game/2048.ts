@@ -264,6 +264,9 @@ class Blocks extends Square {
   }
 
   addBlock() {
+    if (this.blocks.length >= 16) {
+      return false;
+    }
     const row = random(0, 3);
     const col = random(0, 3);
     if (!this.blocks[row][col]) {
