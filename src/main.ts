@@ -1,4 +1,4 @@
-import game from './game/2048';
+import game from './game/flappy-bird';
 
 game.run();
 console.log('run');

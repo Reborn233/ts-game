@@ -1,7 +1,5 @@
 const resolve = require('path').resolve;
-const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const url = require('url');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const publicPath = '';
@@ -25,17 +23,14 @@ module.exports = (options = {}) => ({
         use: ['ts-loader', 'tslint-loader'],
         exclude: /node_modules/
       },
+      // {
+      //   test: /\.js$/,
+      //   use: ['babel-loader', 'eslint-loader'],
+      //   exclude: /node_modules/
+      // },
       {
-        test: /\.js$/,
-        use: ['babel-loader', 'eslint-loader'],
-        exclude: /node_modules/
-      },
-      {
-        test: /\.(less|css)$/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: ['css-loader', 'less-loader', 'postcss-loader']
-        })
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader', 'postcss-loader']
       },
       {
         test: /\.(png|jpg|jpeg|gif|eot|ttf|woff|woff2|svg|svgz)(\?.+)?$/,
@@ -44,7 +39,6 @@ module.exports = (options = {}) => ({
     ]
   },
   plugins: [
-    new ExtractTextPlugin('static/css/styles.css'),
     new HtmlWebpackPlugin({
       template: 'src/index.html',
       favicon: 'src/favicon.ico'
@@ -53,9 +47,6 @@ module.exports = (options = {}) => ({
   optimization: {
     splitChunks: {
       chunks: 'all'
-      // name: 'vendor',
-      // chunks: 'initial',
-      // minChunks: 2
     },
     minimizer: [
       new UglifyJsPlugin({
