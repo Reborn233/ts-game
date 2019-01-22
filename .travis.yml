@@ -31,4 +31,4 @@ branches:
     - master
 env:
   global:
-    - GH_REF: github.com/Reborn233/Reborn233.github.io.git
+    - GH_REF: github.com:Reborn233/ts-game.git
