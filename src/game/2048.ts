@@ -13,7 +13,7 @@ const COLOR = {
   256: 'rgb(232,204,114)',
   512: 'rgb(232,199,106)',
   1024: 'rgb(231,198,89)',
-  2048: 'rgb(231,198,89)'
+  2048: 'rgb(291,188,63)'
 };
 // 字体大小和间隙
 const FONT = {
@@ -288,6 +288,17 @@ class Blocks {
     return true;
   }
 
+  win() {
+    for (let i = 0; i < this.row; i++) {
+      for (let j = 0; j < this.col; j++) {
+        if (this.blocks[i][j] === 2048) {
+          return true;
+        }
+      }
+      return false;
+    }
+  }
+
   addBlock() {
     // 没有空格添加
     if (this.over()) {
@@ -341,11 +352,13 @@ class Game {
   bg: Background;
   blocks: Blocks;
   stop: boolean;
+  msg: number;
   constructor(fps: number = 60) {
     this.fps = fps;
     this.stop = false;
     this.bg = new Background();
     this.blocks = new Blocks();
+    this.msg = 1;
 
     document.addEventListener('keydown', this.keyDown.bind(this));
   }
@@ -368,16 +381,23 @@ class Game {
     this.renderMsg();
   }
   renderMsg() {
+    const msg = {
+      1: 'Game Over',
+      2: 'You Win'
+    };
     ctx.font = '60px Microsoft YaHei';
     if (this.stop) {
-      ctx.fillStyle = 'red';
-      ctx.fillText('game over', s / 2, s / 2);
+      ctx.fillStyle = 'rgba(0,0,0,.5)';
+      radiusRect(0, 0, s, s, 10);
+      ctx.fillStyle = this.msg === 1 ? 'red' : 'white';
+      ctx.fillText(msg[this.msg], s / 2, s / 2);
       ctx.textAlign = 'center';
     }
   }
   start() {
     this.blocks.init();
     this.stop = false;
+    this.msg = 1;
   }
   keyDown(e: KeyboardEvent) {
     const key = e.keyCode;
@@ -390,6 +410,12 @@ class Game {
     }
     if (this.blocks.gameOver()) {
       this.stop = true;
+      this.msg = 1;
+      return false;
+    }
+    if (this.blocks.win()) {
+      this.stop = true;
+      this.msg = 2;
       return false;
     }
     this.blocks.move(key);
