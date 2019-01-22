@@ -61,7 +61,7 @@ module.exports = (options = {}) => ({
     new HtmlWebpackPlugin({
       filename: '2048.html',
       template: 'src/index.html',
-      chunks: ['g2048'],
+      chunks: ['2048'],
       favicon: 'src/favicon.ico'
     })
   ],
