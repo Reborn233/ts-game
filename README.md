@@ -7,6 +7,8 @@
 - 躲避
 - 2048
 
+[点击预览最新](https://reborn233.github.io/ts-game/)
+
 ## Develop
 
 ```bash
