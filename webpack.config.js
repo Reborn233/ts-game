@@ -23,11 +23,6 @@ module.exports = (options = {}) => ({
         use: ['ts-loader', 'tslint-loader'],
         exclude: /node_modules/
       },
-      // {
-      //   test: /\.js$/,
-      //   use: ['babel-loader', 'eslint-loader'],
-      //   exclude: /node_modules/
-      // },
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader', 'postcss-loader']
