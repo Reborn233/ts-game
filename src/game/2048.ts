@@ -47,7 +47,13 @@ const random = (min: number, max: number): number => {
 };
 
 // 圆角矩形
-const radiusRect = (left, top, width, height, r) => {
+const radiusRect = (
+  left: number,
+  top: number,
+  width: number,
+  height: number,
+  r: number
+) => {
   const pi = Math.PI;
   ctx.beginPath();
   ctx.arc(left + r, top + r, r, -pi, -pi / 2);
@@ -58,7 +64,7 @@ const radiusRect = (left, top, width, height, r) => {
   ctx.closePath();
 };
 
-// 移动数组数字
+// 往左移动数组数字相同合并 (核心算法)  上右下 在此基础拓展
 const moveArray = (arr: number[]): number[] => {
   /**
    *  遍历数组从数组的的当前位置的下一个开始遍历，找不是0的位置()
@@ -135,35 +141,16 @@ const rotateRight = (matrix: number[][]) => {
   return temp;
 };
 
-// 元素基础类
-class Square {
+// 游戏背景
+class Background {
   x: number;
   y: number;
   width: number;
   height: number;
   color?: string;
-  speedX?: number;
-  speedY?: number;
-  constructor() {}
-  update(game?: Game) {}
-  render(game?: Game) {
-    const { x, y, width, height, color = 'white' } = this;
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, width, height);
-  }
-  renderRadius() {
-    const { x, y, width, height, color = 'white' } = this;
-    ctx.fillStyle = color;
-    radiusRect(x, y, width, height, 10);
-  }
-}
-
-// 游戏背景
-class Background extends Square {
   coord: any[];
   brown?: string;
   constructor() {
-    super();
     this.x = 0;
     this.y = 0;
     this.width = canv.width;
@@ -173,7 +160,7 @@ class Background extends Square {
     this.coord = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
   }
   render() {
-    super.renderRadius();
+    this.renderRadius();
     ctx.fillStyle = this.brown;
     for (let i = 0; i < this.coord.length; i++) {
       for (let j = 0; j < this.coord[i].length; j++) {
@@ -187,21 +174,23 @@ class Background extends Square {
       }
     }
   }
+  renderRadius() {
+    const { x, y, width, height, color = 'white' } = this;
+    ctx.fillStyle = color;
+    radiusRect(x, y, width, height, 10);
+  }
 }
 // 方块类
-class Blocks extends Square {
+class Blocks {
   blocks: number[][];
   row: number;
   col: number;
   fontSize: number;
-  canMove: boolean;
   constructor() {
-    super();
     this.row = 4; // 4行
     this.col = 4; // 4列
-    this.blocks = [];
+    this.blocks = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
     this.fontSize = 90;
-    this.canMove = true;
     this.init();
   }
 
@@ -216,55 +205,92 @@ class Blocks extends Square {
     this.addBlock();
     this.addBlock();
   }
-  move(dir: string) {
-    this.canMove = false;
+  move(dir: number) {
     switch (dir) {
-      case 'left':
-        this.moveLeft();
+      case 37:
+        this.left();
         break;
-      case 'right':
-        this.moveRight();
+      case 39:
+        this.right();
         break;
-      case 'up':
-        this.moveUp();
+      case 38:
+        this.up();
         break;
-      case 'down':
-        this.moveDown();
+      case 40:
+        this.down();
         break;
     }
     this.addBlock();
   }
-  moveUp() {
+  up() {
     const arr = [];
     for (let i = 0; i < this.row; i++) {
       arr.push(moveArray(rotateLeft(this.blocks)[i]));
     }
     this.blocks = rotateRight(arr);
   }
-  moveDown() {
+  down() {
     const arr = [];
     for (let i = 0; i < this.row; i++) {
       arr.push(moveArray(rotateRight(this.blocks)[i]));
     }
     this.blocks = rotateLeft(arr);
   }
-  moveLeft() {
+  left() {
     const arr = [];
     for (let i = 0; i < this.row; i++) {
       arr.push(moveArray(this.blocks[i]));
     }
     this.blocks = arr;
   }
-  moveRight() {
+  right() {
     const arr = [];
     for (let i = 0; i < this.row; i++) {
-      arr.push(moveArray(this.blocks[i]).reverse());
+      arr.push(moveArray(this.blocks[i].reverse()).reverse());
     }
     this.blocks = arr;
   }
 
+  over(): boolean {
+    for (let i = 0; i < this.row; i++) {
+      for (let j = 0; j < this.col; j++) {
+        if (this.blocks[i][j] === 0) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+  gameOver() {
+    /**
+     * 循环二维数组 从左到右，从上到下比较相邻数字 是否相等
+     * 相等表示游戏可以继续 或者  有一位为0  也可以继续游戏
+     * 否则 游戏结束
+     */
+    for (let i = 0; i < this.row; i++) {
+      for (let j = 0; j < this.col; j++) {
+        if (this.blocks[i][j] === 0) {
+          return false;
+        } else if (
+          j < this.blocks[i].length - 1 &&
+          this.blocks[i][j] === this.blocks[i][j + 1]
+        ) {
+          return false;
+        } else if (
+          i < this.blocks.length - 1 &&
+          this.blocks[i][j] === this.blocks[i + 1][j]
+        ) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   addBlock() {
-    if (this.blocks.length >= 16) {
+    // 没有空格添加
+    if (this.over()) {
+      console.log('over');
       return false;
     }
     const row = random(0, 3);
@@ -310,27 +336,17 @@ class Blocks extends Square {
 }
 // 游戏主体
 class Game {
-  stop: boolean;
   fps: number;
   bg: Background;
   blocks: Blocks;
-  score: number;
-  msg: string;
-  frameCount: number;
-  speed: number;
-  dir: string;
+  stop: boolean;
   constructor(fps: number = 60) {
-    this.stop = false;
     this.fps = fps;
-    this.score = 0;
-    this.msg = '游戏结束';
-    this.frameCount = 0;
-    this.dir = '';
+    this.stop = false;
     this.bg = new Background();
     this.blocks = new Blocks();
 
     document.addEventListener('keydown', this.keyDown.bind(this));
-    document.addEventListener('keyup', this.keyUp.bind(this));
   }
   run() {
     this.update(); // 更新
@@ -341,67 +357,41 @@ class Game {
     }, 1000 / this.fps);
   }
 
-  update() {
-    if (this.stop) {
-      return;
-    }
-  }
+  update() {}
   clear() {
     ctx.clearRect(0, 0, canv.width, canv.height);
   }
   draw() {
     this.bg.render();
     this.blocks.render();
+    this.renderMsg();
   }
-  setScore(score: number) {
-    this.score = score;
-  }
-  renderScore() {
-    ctx.font = '30px Georgia';
-    ctx.fillStyle = 'white';
-    ctx.fillText(this.score + '', 20, 30);
+  renderMsg() {
+    ctx.font = '60px Microsoft YaHei';
     if (this.stop) {
       ctx.fillStyle = 'red';
-      ctx.fillText(this.msg, s / 2, s / 2);
+      ctx.fillText('game over', s / 2, s / 2);
       ctx.textAlign = 'center';
     }
   }
-  gameOver() {
-    this.msg = '游戏结束';
-    this.stop = true;
-  }
   start() {
-    this.stop = false;
-    this.score = 0;
     this.blocks.init();
-  }
-  pause() {
-    this.stop = !this.stop;
-    this.msg = '暂停';
+    this.stop = false;
   }
   keyDown(e: KeyboardEvent) {
     const key = e.keyCode;
-    switch (key) {
-      case 37:
-        // 左
-        this.blocks.move('left');
-        break;
-      case 38:
-        // 上
-        this.blocks.move('up');
-        break;
-      case 39:
-        // 右
-        this.blocks.move('right');
-        break;
-      case 40:
-        // 下
-        this.blocks.move('down');
-        break;
+    if (key === 49) {
+      this.start();
+      return;
     }
-  }
-  keyUp() {
-    this.dir = '';
+    if (this.stop) {
+      return;
+    }
+    if (this.blocks.gameOver()) {
+      this.stop = true;
+      return false;
+    }
+    this.blocks.move(key);
   }
 }
 export default new Game();
