@@ -9,10 +9,8 @@ module.exports = (options = {}) => ({
   entry: config.entries(),
   output: {
     path: resolve(__dirname, 'dist'),
-    filename: options.dev
-      ? 'static/js/[name].js'
-      : 'static/js/[name].js?[chunkhash]',
-    chunkFilename: 'static/js/[id].js?[chunkhash]',
+    filename: options.dev ? 'js/[name].js' : 'js/[name].js?[chunkhash]',
+    chunkFilename: 'js/[id].js?[chunkhash]',
     publicPath: options.dev ? '/assets/' : publicPath
   },
   module: {
@@ -36,9 +34,11 @@ module.exports = (options = {}) => ({
     new HtmlWebpackPlugin({
       template: 'src/index.html',
       chunks: ['index'],
-      favicon: 'src/favicon.ico'
+      favicon: 'src/favicon.ico',
+      title: 'game',
+      url: options.dev ? '/assets' : ''
     }),
-    ...config.htmlPlugin()
+    ...config.htmlPlugin(options)
   ],
   optimization: {
     splitChunks: {

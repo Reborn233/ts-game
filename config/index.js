@@ -13,14 +13,16 @@ exports.entries = () => {
 
   return entry;
 };
-exports.htmlPlugin = () => {
+exports.htmlPlugin = (options = {}) => {
   let arrHtml = [];
   htmls.forEach(name => {
     const config = {
       filename: name + '.html',
       template: 'src/index.html',
       chunks: [name],
-      favicon: 'src/favicon.ico'
+      favicon: 'src/favicon.ico',
+      title: name,
+      url: options.dev ? '/assets' : ''
     };
     arrHtml.push(new HtmlWebpackPlugin(config));
   });
