@@ -5,9 +5,8 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const publicPath = '';
 
 const config = require('./config');
-console.log(config.htmlPlugin);
 module.exports = (options = {}) => ({
-  entry: config.entries,
+  entry: config.entries(),
   output: {
     path: resolve(__dirname, 'dist'),
     filename: options.dev
@@ -33,37 +32,13 @@ module.exports = (options = {}) => ({
       }
     ]
   },
-  // plugins: config.htmlPlugin,
   plugins: [
     new HtmlWebpackPlugin({
       template: 'src/index.html',
       chunks: ['index'],
       favicon: 'src/favicon.ico'
     }),
-    new HtmlWebpackPlugin({
-      filename: 'snake.html',
-      template: 'src/index.html',
-      chunks: ['snake'],
-      favicon: 'src/favicon.ico'
-    }),
-    new HtmlWebpackPlugin({
-      filename: 'flappy.html',
-      template: 'src/index.html',
-      chunks: ['flappy'],
-      favicon: 'src/favicon.ico'
-    }),
-    new HtmlWebpackPlugin({
-      filename: 'dodge.html',
-      template: 'src/index.html',
-      chunks: ['dodge'],
-      favicon: 'src/favicon.ico'
-    }),
-    new HtmlWebpackPlugin({
-      filename: '2048.html',
-      template: 'src/index.html',
-      chunks: ['2048'],
-      favicon: 'src/favicon.ico'
-    })
+    ...config.htmlPlugin()
   ],
   optimization: {
     splitChunks: {

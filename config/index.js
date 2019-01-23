@@ -10,10 +10,11 @@ exports.entries = () => {
     entry[name] = `./src/views/${name}.ts`;
   });
   entry['index'] = './src/main.ts';
+
   return entry;
 };
 exports.htmlPlugin = () => {
-  const arrHtml = [];
+  let arrHtml = [];
   htmls.forEach(name => {
     const config = {
       filename: name + '.html',
