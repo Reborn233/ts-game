@@ -60,8 +60,8 @@ class Bird extends Square {
       game.gameOver();
     }
     // 到顶！d=====(￣▽￣*)b
-    if (this.y < 15) {
-      this.y = 15;
+    if (this.y < 0) {
+      this.y = 0;
       this.v = 0;
     }
   }

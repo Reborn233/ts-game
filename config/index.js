@@ -1,6 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const htmls = ['snake', 'flappy', 'dodge', '2048'];
+const htmls = ['snake', 'flappy', 'dodge', '2048', '3DSpace'];
 /**
  * 多入口配置
  */
@@ -22,7 +22,7 @@ exports.htmlPlugin = (options = {}) => {
       chunks: [name],
       favicon: 'src/favicon.ico',
       title: name,
-      url: options.dev ? '/assets' : ''
+      url: options.dev ? '/assets' : '.'
     };
     arrHtml.push(new HtmlWebpackPlugin(config));
   });
