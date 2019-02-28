@@ -1,4 +1,4 @@
-import { random } from '../libs/utils';
+import { random } from '../tools/utils';
 const W: number = 600;
 const H: number = 400;
 const canv: HTMLCanvasElement = document.createElement('canvas');
