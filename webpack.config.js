@@ -36,7 +36,7 @@ module.exports = (options = {}) => ({
       chunks: ['index'],
       favicon: 'src/favicon.ico',
       title: 'game',
-      url: options.dev ? '/assets' : ''
+      url: options.dev ? '/assets' : '.'
     }),
     ...config.htmlPlugin(options)
   ],

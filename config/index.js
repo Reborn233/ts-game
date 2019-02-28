@@ -22,7 +22,7 @@ exports.htmlPlugin = (options = {}) => {
       chunks: [name],
       favicon: 'src/favicon.ico',
       title: name,
-      url: options.dev ? '/assets' : '/ts-game'
+      url: options.dev ? '/assets' : '.'
     };
     arrHtml.push(new HtmlWebpackPlugin(config));
   });
