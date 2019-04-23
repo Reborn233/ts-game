@@ -10,6 +10,7 @@ exports.entries = () => {
     entry[name] = `./src/views/${name}.ts`;
   });
   entry['index'] = './src/main.ts';
+  entry['flower'] = './src/views/flower.ts';
 
   return entry;
 };
@@ -26,5 +27,15 @@ exports.htmlPlugin = (options = {}) => {
     };
     arrHtml.push(new HtmlWebpackPlugin(config));
   });
+  arrHtml.push(
+    new HtmlWebpackPlugin({
+      filename: 'flower.html',
+      template: 'src/flower.html',
+      chunks: ['flower'],
+      favicon: 'src/favicon.ico',
+      title: 'flower',
+      url: options.dev ? '/assets' : '.'
+    })
+  );
   return arrHtml;
 };
