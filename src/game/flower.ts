@@ -183,14 +183,14 @@ class Game {
   }
 
   days() {
-    const lovestartday = '2019/03/20';
+    const lovestartday = '2019/04/20';
     const lovedays = Math.floor(
       (Date.parse(new Date() + '') - Date.parse(new Date(lovestartday) + '')) /
         86400000
     );
     context.font = '16px Arial';
     context.fillStyle = 'rgb(229,103,71)';
-    context.fillText(`在一起 ${lovedays} 天啦!`, 0, 300);
+    context.fillText(`在一起 ${lovedays} 天啦 !`, 0, 300);
   }
 
   // 背景渐变
