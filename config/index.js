@@ -1,6 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const htmls = ['snake', 'flappy', 'dodge', '2048', '3DSpace', 'link'];
+const htmls = ['snake', 'flappy', 'dodge', '2048', '3DSpace', 'link', 'tetris'];
 /**
  * 多入口配置
  */
