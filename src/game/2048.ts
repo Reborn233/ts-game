@@ -1,6 +1,17 @@
-const s: number = 450; // 背景尺寸
-const bs: number = 100; // 方块尺寸
+
+import * as Hammer from 'hammerjs';
 const space: number = 10; // 空隙
+const screenW = document.documentElement.clientWidth;
+const w = screenW > 500 ? 500 : screenW;
+const blockW = (w - space * 5) / 4;
+const s: number = w; // 背景尺寸
+const bs: number = blockW; // 方块尺寸
+const KEYS = {
+  LEFT: 37,
+  RIGHT: 39,
+  UP: 38,
+  DOWN: 40
+};
 // 颜色表
 const COLOR = {
   2: 'rgb(236,228,219)',
@@ -40,8 +51,13 @@ canv.width = s;
 canv.height = s;
 const ctx: CanvasRenderingContext2D = canv.getContext('2d');
 const app: HTMLElement = document.getElementById('app');
+const startBtn = document.createElement('button');
+startBtn.textContent = '重置';
 
+app.appendChild(startBtn);
 app.appendChild(canv);
+const hammer = new Hammer(canv);
+hammer.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
 // 随机数
 const random = (min: number, max: number): number => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -195,7 +211,7 @@ class Blocks {
     this.init();
   }
 
-  update(game?: Game) {}
+  update(game?: Game) { }
   init() {
     for (let i = 0; i < this.row; i++) {
       this.blocks[i] = [];
@@ -208,16 +224,16 @@ class Blocks {
   }
   move(dir: number) {
     switch (dir) {
-      case 37:
+      case KEYS.LEFT:
         this.left();
         break;
-      case 39:
+      case KEYS.RIGHT:
         this.right();
         break;
-      case 38:
+      case KEYS.UP:
         this.up();
         break;
-      case 40:
+      case KEYS.DOWN:
         this.down();
         break;
     }
@@ -360,7 +376,7 @@ class Game {
     this.blocks = new Blocks();
     this.msg = 1;
 
-    document.addEventListener('keydown', this.keyDown.bind(this));
+    this.bindEvent();
   }
   run() {
     this.update(); // 更新
@@ -371,7 +387,7 @@ class Game {
     }, 1000 / this.fps);
   }
 
-  update() {}
+  update() { }
   clear() {
     ctx.clearRect(0, 0, canv.width, canv.height);
   }
@@ -419,6 +435,15 @@ class Game {
       return false;
     }
     this.blocks.move(key);
+  }
+  bindEvent() {
+    // document.addEventListener('keydown', this.keyDown.bind(this));
+    hammer.on('swipeleft', () => this.blocks.move(KEYS.LEFT));
+    hammer.on('swiperight', () => this.blocks.move(KEYS.RIGHT));
+    hammer.on('swipeup', () => this.blocks.move(KEYS.UP));
+    hammer.on('swipedown', () => this.blocks.move(KEYS.DOWN));
+
+    startBtn.addEventListener('click', this.start.bind(this));
   }
 }
 export default new Game();
