@@ -1,12 +1,21 @@
-const H: number = 600;
-const W: number = 400;
+const screenW = document.documentElement.clientWidth;
+const screenH = document.documentElement.clientHeight;
+const width = screenW > 500 ? 500 : screenW;
+const W: number = width;
+const H: number = screenH;
 const canv: HTMLCanvasElement = document.createElement('canvas');
 canv.width = W;
 canv.height = H;
 const ctx: CanvasRenderingContext2D = canv.getContext('2d');
 const app: HTMLElement = document.getElementById('app');
+// const startBtn = document.createElement('button');
+// const pauseBtn = document.createElement('button');
+// startBtn.textContent = '开始';
+// pauseBtn.textContent = '暂停';
 
 app.appendChild(canv);
+// app.appendChild(startBtn);
+// app.appendChild(pauseBtn);
 
 // 随机数
 const random = (min: number, max: number): number => {
@@ -21,8 +30,8 @@ class Square {
   color?: string;
   speedX?: number;
   speedY?: number;
-  constructor() {}
-  update(game?: Game) {}
+  constructor() { }
+  update(game?: Game) { }
   render(game?: Game) {
     const { x, y, width, height, color = 'white' } = this;
     ctx.fillStyle = color;
@@ -42,7 +51,7 @@ class Player extends Square {
     this.width = 99;
     this.height = 50;
     this.color = '#fff';
-    this.y = H - this.height * 2;
+    this.y = canv.height - this.height * 4;
   }
 
   render() {
@@ -73,7 +82,7 @@ class Wall extends Square {
   left: number;
   right: number;
   highlight: boolean;
-  constructor(speed: number) {
+  constructor(speed: number = 10) {
     super();
     this.width = 99;
     this.height = 20;
@@ -81,7 +90,7 @@ class Wall extends Square {
     this.right = random(0, 100) % 2 === 0 ? 200 : 300;
     this.y = 0;
     this.highlight = false;
-    this.speedY = speed || 5;
+    this.speedY = speed;
   }
 
   update(game?: Game) {
@@ -128,6 +137,7 @@ class Background extends Square {
 }
 // 游戏主体
 class Game {
+  over: boolean;
   stop: boolean;
   fps: number;
   bg: Background;
@@ -138,17 +148,19 @@ class Game {
   frameCount: number;
   speed: number;
   constructor(fps: number = 60) {
-    this.stop = false;
+    this.stop = true;
     this.fps = fps;
     this.score = 0;
-    this.msg = '游戏结束';
+    this.msg = '点击屏幕开始';
     this.frameCount = 0;
     this.bg = new Background();
     this.player = new Player();
     this.walls = [];
     this.speed = 5;
-    document.addEventListener('keydown', this.keyPush.bind(this));
-    document.addEventListener('keyup', this.keyUp.bind(this));
+    // startBtn.addEventListener('click', this.start.bind(this));
+    // pauseBtn.addEventListener('click', this.pause.bind(this));
+    canv.addEventListener('touchstart', this.touchstart.bind(this));
+    canv.addEventListener('touchend', this.touchend.bind(this));
   }
   run() {
     this.update(); // 更新
@@ -161,7 +173,7 @@ class Game {
 
   update() {
     this.frameCount++;
-    if (this.stop) {
+    if (this.stop || this.over) {
       return;
     }
 
@@ -193,11 +205,18 @@ class Game {
     this.player.render();
     this.renderScore();
 
-    if (!this.stop && this.frameCount % 60 === 0) {
-      if (this.score > 0 && this.score % 10 === 0) {
-        this.speed += 0.5;
+    if (!this.stop) {
+      const lastWall = this.walls[this.walls.length - 1];
+      if (lastWall) {
+        if (lastWall.y > 180 - this.speed) {
+          if (this.score > 0 && this.score % 3 === 0) {
+            this.speed += 5;
+          }
+          this.walls.push(new Wall(5));
+        }
+      } else {
+        this.walls.push(new Wall(5));
       }
-      this.walls.push(new Wall(this.speed));
     }
   }
   setScore(score: number) {
@@ -207,7 +226,7 @@ class Game {
     ctx.font = '30px Georgia';
     ctx.fillStyle = 'white';
     ctx.fillText(this.score + '', 20, 30);
-    if (this.stop) {
+    if (this.stop || this.over) {
       ctx.fillStyle = 'red';
       ctx.fillText(this.msg, W / 2, H / 2);
       ctx.textAlign = 'center';
@@ -215,17 +234,61 @@ class Game {
   }
   gameOver() {
     this.msg = '游戏结束';
-    this.stop = true;
+    this.over = true;
   }
   start() {
+    if (this.stop === false) {
+      return;
+    }
     this.stop = false;
     this.score = 0;
     this.walls = [];
     this.player.reset();
+    this.speed = 5;
   }
   pause() {
     this.stop = !this.stop;
     this.msg = '暂停';
+  }
+  touchstart(e) {
+    e.preventDefault();
+    this.start()
+    if (this.stop) {
+      return;
+    }
+    for (const touch of e.touches) {
+      const { clientX, clientY } = touch;
+      if (clientY > H / 2 && clientX < W / 2) {
+        this.player.move('left', 0);
+      } else if (clientY > H / 2 && clientX > W / 2) {
+        this.player.move('right', 3);
+      }
+    }
+  }
+  touchend(e) {
+    e.preventDefault();
+    if (this.stop) {
+      return;
+    }
+    const touches = [];
+    for (const touch of e.touches) {
+      const { clientX, clientY } = touch;
+      if (clientY > H / 2 && clientX < W / 2) {
+        touches.push('left');
+      } else if (clientY > H / 2 && clientX > W / 2) {
+        touches.push('right');
+      }
+    }
+    if (touches.indexOf('left') > -1) {
+      this.player.move('left', 0);
+    } else {
+      this.player.move('left', 1);
+    }
+    if (touches.indexOf('right') > -1) {
+      this.player.move('right', 3);
+    } else {
+      this.player.move('right', 2);
+    }
   }
   keyPush(e: KeyboardEvent) {
     switch (e.keyCode) {

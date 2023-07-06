@@ -70,7 +70,7 @@ module.exports = (options = {}) => ({
     extensions: ['.js', '.json', '.css', '*', '.ts', '.tsx']
   },
   devServer: {
-    host: '127.0.0.1',
+    host: '0.0.0.0',
     port: 8010,
     proxy: {
       '/api/': {
