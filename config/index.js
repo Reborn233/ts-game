@@ -11,6 +11,7 @@ exports.entries = () => {
   });
   entry['index'] = './src/main.ts';
   entry['flower'] = './src/views/flower.ts';
+  entry['bottle'] = './src/views/bottle.ts';
 
   return entry;
 };
@@ -34,6 +35,17 @@ exports.htmlPlugin = (options = {}) => {
       chunks: ['flower'],
       favicon: 'src/favicon.ico',
       title: 'flower',
+      url: options.dev ? '/assets' : '.'
+    })
+  );
+  // bottle
+  arrHtml.push(
+    new HtmlWebpackPlugin({
+      filename: 'bottle.html',
+      template: 'src/bottle.html',
+      chunks: ['bottle'],
+      favicon: 'src/favicon.ico',
+      title: 'bottle',
       url: options.dev ? '/assets' : '.'
     })
   );

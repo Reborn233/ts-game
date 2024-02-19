@@ -252,7 +252,7 @@ class Game {
   }
   touchstart(e) {
     e.preventDefault();
-    this.start()
+    this.start();
     if (this.stop) {
       return;
     }

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>猜瓶子颜色</title>
+    <style>
+      #app {
+        padding: 30px 15px;
+      }
+
+      #bottle-container .bottle {
+        cursor: pointer;
+      }
+
+      .bottle {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        margin-right: 15px;
+      }
+
+      .bottle.selected {
+        top: -15px;
+      }
+
+      .bottle-hd {
+        width: 25px;
+        height: 25px;
+        border: 2px solid #333;
+        border-bottom: none;
+        background-color: #ccc;
+        pointer-events: none;
+      }
+
+      .bottle-bd {
+        width: 50px;
+        height: 75px;
+        border: 2px solid #333;
+        pointer-events: none;
+      }
+
+      .bottles {
+        display: flex;
+      }
+
+      .screen {
+        position: absolute;
+        width: 330px;
+        height: 80px;
+        left: 0;
+        bottom: 0;
+        z-index: 9;
+        background-color: #333;
+      }
+
+      .num,
+      .steps,
+      .msg {
+        width: 330px;
+        text-align: center;
+        margin-top: 15px;
+        cursor: pointer;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div id="app">
+      <!-- <h1>猜瓶子颜色</h1> -->
+      <div id="bottle-container" class="bottles">
+
+      </div>
+      <br>
+      <div style="position: relative;">
+        <div id="result-container" class="bottles"></div>
+        <div class="screen" id="screen"></div>
+      </div>
+      <div class="num" id="num"></div>
+      <div class="steps" id="steps"></div>
+      <div class="msg" id="msg" style="display: none;"></div>
+    </div>
+  </body>
+
+</html>
+<script>
+  const bottleTemplate = (color) => {
+    const html = ` <div class="bottle" data-name='bottle' data-color='${color}'>
+          <div class="bottle-hd"></div>
+          <div class="bottle-bd" style='background-color:${color}'>
+          </div>
+        </div>`
+    return html
+  }
+  const color = ['red', 'orange', 'yellow', 'green', 'blue']
+  const shuffle = (a = []) => {
+    if (a.length === 0 || !a) return []
+    const _a = JSON.parse(JSON.stringify(a))
+    let m = _a.length, i
+    while (m) {
+      i = (Math.random() * m--) >>> 0;
+      [_a[m], _a[i]] = [_a[i], _a[m]]
+    }
+    return _a
+  }
+  const shuffle2 = (a = []) => {
+    let b = JSON.parse(JSON.stringify(a))
+    let res = []
+    for (let i = 0; i < a.length; i++) {
+      const a1 = a[i];
+      for (let j = 0; j < b.length; j++) {
+        const b1 = b[j];
+        if (b1 !== a1) {
+          res.push(b1)
+          b.splice(j, 1)
+        }
+      }
+    }
+    return res
+  }
+
+  const buildBottles = (shuffleColor = []) => {
+    return shuffleColor.map(l => {
+      return bottleTemplate(l)
+    }).join('')
+  }
+  const swap = (array = [], a, b) => {
+    let index1 = array.indexOf(a)
+    let index2 = array.indexOf(b)
+    let temp = array[index1];
+    array[index1] = array[index2];
+    array[index2] = temp;
+    return array
+  }
+  const game = {
+    shuffleColor1: [],
+    shuffleColor2: [],
+    swapBottle: null,
+    steps: 0,
+    renderResult () {
+      const resultHtml = buildBottles(game.shuffleColor2)
+      const resultContainer = document.querySelector('#result-container')
+      resultContainer.innerHTML = resultHtml
+    },
+    renderBottles () {
+      const bottleContainer = document.querySelector('#bottle-container')
+      const bottleHtml = buildBottles(game.shuffleColor1)
+      bottleContainer.innerHTML = bottleHtml
+    },
+    renderSteps () {
+      const steps = document.querySelector('#steps')
+      steps.innerHTML = `${game.steps}步`
+    },
+    renderNum () {
+      const sameNum = game.calcSameNum()
+      const num = document.querySelector('#num')
+      num.innerHTML = `有${sameNum}正确`
+      if (sameNum === color.length) {
+        const screen = document.querySelector('#screen')
+        screen.style.display = 'none'
+        game.success()
+      }
+    },
+    success () {
+      const msg = document.querySelector('#msg')
+      msg.style.display = 'block'
+      msg.innerHTML = `恭喜猜对啦，共计${game.steps}步，点击重新开始`
+    },
+    calcSameNum () {
+      let sameNum = 0
+      for (let i = 0; i < game.shuffleColor2.length; i++) {
+        const s2 = game.shuffleColor2[i]
+        const s1 = game.shuffleColor1[i]
+        if (s1 === s2) {
+          sameNum++
+        }
+      }
+      return sameNum
+    },
+    buildEvent () {
+      const bottleContainer = document.querySelector('#bottle-container')
+      const msg = document.querySelector('#msg')
+      msg.addEventListener('click', () => {
+        game.reset()
+      })
+      bottleContainer.addEventListener('click', (ev) => {
+        ev.preventDefault()
+        const target = ev.target
+        if (target.dataset.name === 'bottle') {
+          if (target.classList.contains('selected')) {
+            target.classList.remove('selected')
+            game.swapBottle = null
+          }
+          else {
+            target.classList.add('selected')
+            if (game.swapBottle) {
+              const c1 = game.swapBottle
+              const c2 = target.dataset.color
+              game.shuffleColor1 = swap(game.shuffleColor1, c1, c2)
+              game.renderBottles()
+              game.swapBottle = null
+              game.steps++
+              game.renderSteps()
+              game.renderNum()
+            }
+            else {
+              game.swapBottle = target.dataset.color
+            }
+          }
+        }
+      })
+    },
+    run () {
+      game.shuffleColor1 = shuffle(color)
+      game.shuffleColor2 = shuffle2(game.shuffleColor1)
+      game.renderBottles()
+      game.renderResult()
+      game.buildEvent()
+    },
+    reset () {
+      game.shuffleColor1 = shuffle(color)
+      game.shuffleColor2 = shuffle2(game.shuffleColor1)
+      game.renderBottles()
+      game.renderResult()
+      game.swapBottle = null
+      game.steps = 0
+      document.querySelector('#steps').innerHTML = ''
+      document.querySelector('#num').innerHTML = ''
+      document.querySelector('#screen').style.display = 'block'
+      document.querySelector('#msg').style.display = 'none'
+    }
+  }
+  const __init__ = () => {
+    game.run()
+  }
+  window.onload = __init__
+</script>

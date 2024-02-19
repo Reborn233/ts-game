@@ -7,6 +7,7 @@ module.exports = {
     browser: true
   },
   extends: 'eslint:recommended',
+  ecmaVersion: 2015,
   rules: {
     'no-console': 0,
     'no-debugger': 2,
